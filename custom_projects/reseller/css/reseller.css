@@ -1,0 +1,69 @@
+.reseller  .panel-faq .list-inline{
+display:table;
+margin:0 auto;
+}
+.reseller  .panel-faq .list-inline li{
+display:table-cell;
+text-align:center;
+padding:0 10px;
+}
+.reseller  .panel-faq .list-inline li a{
+color:#009FE3;
+font-size: 18px;
+font-family:ng-medium;
+}
+.reseller table  td em{
+    font-family: 'ng-regular';
+    font-size: 30px;
+    display: block;
+    color: #29235c;
+    font-weight: 400;
+	font-style:normal;
+	margin-top:15px;
+	margin-bottom:15px;
+}
+.reseller table  td strong{
+font-family: 'ng-bold';
+font-size:14px;
+font-weight:400;
+color:#72559F;
+}
+.reseller table  td{
+color:#009FE3;
+font-size:14px;
+}
+.reseller h2.headText{
+    font-family: 'ng-regular';
+    font-size: 30px;
+    display: block;
+    color: #29235c;
+    font-weight: 400;
+	font-style:normal;
+	margin-top:30px;
+	margin-bottom:30px;
+	text-align:center;
+}
+.reseller .refer-options{
+margin-bottom:30px;
+}
+@media(max-width:767px){
+.reseller tr:first-child td{
+text-align:left !important;
+}
+.reseller table td em {
+    font-family: 'ng-regular';
+    font-size: 24px;
+}
+}
+@media(max-width:479px){
+.reseller table td em {
+    font-family: 'ng-regular';
+    font-size: 16px;
+}
+.reseller .panel-faq.panel > .panel-heading {
+    font-size: 24px;
+}
+.reseller h2.headText{
+    font-size: 24px;
+}
+}

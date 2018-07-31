@@ -1,0 +1,7 @@
+name = Reseller
+description = Module for Reseller
+package = Modules
+core = 7.x
+version = "7.x-1.0"
+stylesheets[all][] = 'css/reseller.css'
+scripts[] = 'js/reseller.js'
