@@ -1,5 +1,4 @@
 <?php
-if(!isset($_SESSION)){session_start();}
 /**
  * @file
  * Examples demonstrating the Drupal Form API.
@@ -28,46 +27,48 @@ if(!isset($_SESSION)){session_start();}
 include 'sites/default/config.php';
 
 function reseller_menu() {
-  $items = array();
+	$items = array();
 
-   $items['reseller/registration'] = array(
-    'title' => t('Become a Reseller'),
-    'page callback' => 'drupal_get_form',
-	'page arguments' => array('reseller_form'),
-	'access arguments' => array('Reseller Config'),
-	'type' => MENU_LOCAL_TASK,
-	'weight' => 51,
-  );
+	$items['reseller/registration'] = array(
+		'title' => t('Become a Reseller'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('reseller_form'),
+		'access arguments' => array('Reseller Config'),
+		'type' => MENU_LOCAL_TASK,
+		'weight' => 51,
+	);
   
-  
-  $items['reseller/registration/status'] = array(
-    'title' => t('Reseller Status'),
-    'page callback' => 'reseller_status',
-	'access arguments' => array('Reseller Config'),
-    //'access callback' => TRUE,
-	'type' => MENU_LOCAL_TASK,
-	'weight' => 52,
-  );
-    $items['reseller/student/registration'] = array(
-    'title' => t('Become a Reseller'),
-    'page callback' => 'drupal_get_form',
-	'page arguments' => array('reseller_student_form'),
-	'access arguments' => array('Reseller Config'),
-	'type' => MENU_LOCAL_TASK,
-	'weight' => 53,
-  );
-   $items['reseller/student/registration/status'] = array(
-    'title' => t('Reseller Status'),
-    'page callback' => 'reseller_student_status',
-	'access arguments' => array('Reseller Config'),
-    //'access callback' => TRUE,
-	'type' => MENU_LOCAL_TASK,
-	'weight' => 54,
+	$items['reseller/registration/status'] = array(
+		'title' => t('Reseller Status'),
+		'page callback' => 'reseller_status',
+		'access arguments' => array('Reseller Config'),
+		//'access callback' => TRUE,
+		'type' => MENU_LOCAL_TASK,
+		'weight' => 52,
+	);
+    
+	$items['reseller/student/registration'] = array(
+		'title' => t('Become a Reseller'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('reseller_student_form'),
+		'access arguments' => array('Reseller Config'),
+		'type' => MENU_LOCAL_TASK,
+		'weight' => 53,
+	);
+	
+	$items['reseller/student/registration/status'] = array(
+		'title' => t('Reseller Status'),
+		'page callback' => 'reseller_student_status',
+		'access arguments' => array('Reseller Config'),
+		//'access callback' => TRUE,
+		'type' => MENU_LOCAL_TASK,
+		'weight' => 54,
   ); 
   return $items;  
   
 }
 
+// reseller module permission
 function reseller_permission() {
     return array(
         'Reseller Config' => array(
@@ -76,161 +77,143 @@ function reseller_permission() {
     );
 }
 
+// reseller form
 function reseller_form($form, &$form_state){
 	global $base_url;
 	global $config;
 	
-		$response = apiPostVRP(RETAILER_TYPE);
+	$response = apiPostVRP(RETAILER_TYPE);
 		
-		$resuller_type_options = array();
-		$resuller_type_ids = array();
+	$resuller_type_options = array();
+	$resuller_type_ids = array();
 		foreach($response as $dn){
 			if($dn['errcode'] == -1){ continue; }
 			$resuller_type_options[$dn['RT_TypeId']] = $dn['RT_TypeName'];
-			
 		}	
 		
-		$form['form_title'] = array(
-			'#type' => 'item',
-			'#markup' => '<h1 class="text-center">'.t('Become a Reseller').'</h1>',
-			'#prefix' => '<div class="pay-box"><div class="panel panel-default panel-llom"><div class="panel-body">',
-			);
+	$form['form_title'] = array(
+		'#type' => 'item',
+		'#markup' => '<h1 class="text-center">'.t('Become a Reseller').'</h1>',
+		'#prefix' => '<div class="pay-box"><div class="panel panel-default panel-llom"><div class="panel-body">',
+	);
 
-
-		$form['retailer_name'] = array(
-	      '#type' => 'textfield',
-	      '#title' => t('Name'),
-		  '#maxlength' => 15,
-		  '#required' => TRUE,
-		  '#prefix' => '<div class="row"><div class="col-sm-6">',
-		  
-	    );
-		$form['email'] = array(
+	$form['retailer_name'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Name'),
+		'#attributes' => array('autocomplete' => 'off', 'placeholder' => t('Name')),
+		'#maxlength' => 15,
+		'#required' => TRUE,
+		'#prefix' => '<div class="row"><div class="col-sm-6">',
+	);
+	
+	$form['email'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Email address'),
 		'#attributes' => array('id' => 'email', 'autocomplete' => 'off', 'placeholder' => t('Email Address')),
 		'#required' => TRUE,
-		);	
+	);	
 
-		$form['pin_code'] = array(
-		  '#type' => 'hidden',
-		  '#maxlength' => 8,
-		  '#required' => TRUE,
-		  '#attributes' => array('id' => 'opc_input'),
-
-		);		
-		$form['address1'] = array(
-		  '#type' => 'textfield',
-		  '#title' => t('House Number'),
-		  //'#attributes' => array('readonly' => 'readonly'),
-		  '#maxlength' => 50,
-		 // '#description' => t('Address1'),
-		  '#required' => TRUE,
-		  '#attributes' => array('readonly' => 'readonly','placeholder' => t('House Number'),'id' => 'address1', 'autocomplete' => 'off'),
-		
-		);	
-		
-		$form['address2'] = array(
-		  '#type' => 'textfield',
-		  '#title' => t('Street Name'),
-		  //'#attributes' => array('readonly' => 'readonly'),
-		  '#maxlength' => 50,
-		  //'#description' => t('Address2'),	
-		  '#attributes' => array('placeholder' => t('Street Name'),'id' => 'address2', 'autocomplete' => 'off'),
-		 // '#required' => TRUE,
-		  '#suffix' => '</div><div class="col-sm-6">'	 
-		);			
-		$form['address3'] = array(
-	      '#type' => 'textfield',
-	      '#title' => t('Address Line3'),
-		  //'#attributes' => array('readonly' => 'readonly'),
-		  '#maxlength' => 50,
-		  //'#description' => t('Please enter the address3'),
-		  '#attributes' => array('placeholder' => t('Address Line3'),'id' => 'address3', 'autocomplete' => 'off'),
-		  //'#required' => TRUE,		  
-	    );
-		
-		$form['town'] = array(
-	      '#type' => 'textfield',
-	      '#title' => t('Town Name'),
-		  '#maxlength' => 50,
-		  //'#attributes' => array('readonly' => 'readonly'),
-		  '#required' => TRUE,
-		  '#attributes' =>array('onblur' =>'townval(this,"town")','placeholder' => t('Town Name'), 'id' => 'town', 'autocomplete' => 'off'),		
-		    
-	    );
-				
-		
-		/*$form['pin_code'] = array(
-			'#title' => t('Postal Code') ,
-			'#type' => 'textfield',
-			'#maxlength' => 8,
-			'#required' => TRUE,
-			'#default_value' => $_SESSION['postcode'],
-			'#attributes' => array(
-				//'onblur' => 'postcodeval(this,"code")',
-				'placeholder' => t('Postal Code') ,
-				'autocomplete' => 'off',
-				'id' => 'varchar_postcode'
-			) ,
-		);	*/
-		$form['prefered_lang'] = array(
-			'#type' => 'select',
-			'#title' => t('Prefered Language'),
-			'#options' => $config['languages'],
-			'#required' => TRUE,
-
-		);						
-		$form['retailer_type'] = array(
-	      '#type' => 'hidden',
-		  '#default_value' => $config['reseller'],
-	    );	
-		$form['country'] = array(
-	      '#type' => 'hidden',
-		  '#default_value' => $config['country_code'],
-	    );
-		
-		$form['WR_University_Name'] = array(
-	      '#type' => 'hidden',
-		  '#default_value' => 'test',
-	    );	
-		
-		$form['mobile-number'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Mobile number'),
-			'#required' => TRUE,
-			'#maxlength' => 15,
-			'#default_value' => $ses_mob_number,
-			'#attributes' => array( 'id' => 'mobile-number', 'autocomplete' => 'off', 'placeholder' => t('Mobile Number')),
-		);	
-		$form['land-number'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Land Line'),
-			'#required' => TRUE,
-			'#maxlength' => 15,
-			'#attributes' => array( 'id' => 'land-number', 'autocomplete' => 'off', 'placeholder' => t('Land Line')),	
-		);	
+	$form['pin_code'] = array(
+		'#type' => 'hidden',
+		'#maxlength' => 8,
+		'#required' => TRUE,
+		'#attributes' => array('id' => 'opc_input'),
+	);		
 	
-		$form['resuller_type_list'] = array(
-			'#type' => 'select',
-			'#title' => t('Type'),
-			'#options' => $resuller_type_options,
-			'#required' => TRUE,
-			'#suffix'=> '</div></div></div></div></div>',	
-		);								
+	$form['address1'] = array(
+		'#type' => 'textfield',
+		'#title' => t('House Number'),
+		'#maxlength' => 50,
+		'#required' => TRUE,
+		'#attributes' => array('readonly' => 'readonly','placeholder' => t('House Number'),'id' => 'address1', 'autocomplete' => 'off'),
+	);	
 		
-		$form['reseller_btn_submit'] = array(
+	$form['address2'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Street Name'),
+		'#maxlength' => 50,
+		'#attributes' => array('placeholder' => t('Street Name'),'id' => 'address2', 'autocomplete' => 'off'),
+		// '#required' => TRUE,
+		'#suffix' => '</div><div class="col-sm-6">'	 
+	);			
+	
+	$form['address3'] = array(
+		'#type' => 'textfield',
+	    '#title' => t('Address Line3'),
+		'#maxlength' => 50,
+		'#attributes' => array('placeholder' => t('Address Line3'),'id' => 'address3', 'autocomplete' => 'off'),
+		//'#required' => TRUE,		  
+	);
+		
+	$form['town'] = array(
+		'#type' => 'textfield',
+	    '#title' => t('Town Name'),
+		'#maxlength' => 50,
+		//'#attributes' => array('readonly' => 'readonly'),
+		'#required' => TRUE,
+		'#attributes' =>array('onblur' =>'townval(this,"town")','placeholder' => t('Town Name'), 'id' => 'town', 'autocomplete' => 'off'),		
+	);
+				
+	$form['prefered_lang'] = array(
+		'#type' => 'select',
+		'#title' => t('Prefered Language'),
+		'#options' => $config['languages'],
+		'#required' => TRUE,
+	);						
+	
+	$form['retailer_type'] = array(
+		'#type' => 'hidden',
+		'#default_value' => $config['reseller'],
+	);	
+	
+	$form['country'] = array(
+		'#type' => 'hidden',
+		'#default_value' => $config['country_code'],
+	);
+		
+	$form['WR_University_Name'] = array(
+		'#type' => 'hidden',
+		'#default_value' => 'test',
+	);	
+		
+	$form['mobile-number'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Mobile number'),
+		'#required' => TRUE,
+		'#maxlength' => 15,
+		'#default_value' => $ses_mob_number,
+		'#attributes' => array('id'=>'mobile-number', 'autocomplete'=>'off', 'placeholder'=>t('Mobile Number')),
+	);	
+	
+	$form['land-number'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Land Line'),
+		'#required' => TRUE,
+		'#maxlength' => 15,
+		'#attributes' => array('id'=>'land-number', 'autocomplete'=>'off', 'placeholder'=>t('Land Line')),	
+	);	
+	
+	$form['resuller_type_list'] = array(
+		'#type' => 'select',
+		'#title' => t('Type'),
+		'#options' => $resuller_type_options,
+		'#required' => TRUE,
+		'#suffix'=> '</div></div></div></div></div>',	
+	);								
+		
+	$form['reseller_btn_submit'] = array(
 		'#type' => 'submit',
 		'#value' => t('Proceed'),
 		'#prefix' => '<div class="col-xs-12 text-center freesim-order-submit">',
 		'#suffix'=> '</div>',
 		'#attributes' => array('class' => array('btn-voilet')),
-		
-		);						
+	);						
 		
 		
 	return $form;	
 }
+
+// function for validating the form input fields
 function reseller_form_validate($form, &$form_state)
 {
 	if ( isset($form_state['values']['resuller_type_list']) && trim($form_state['values']['resuller_type_list']) == '0'){
@@ -249,17 +232,16 @@ function reseller_form_validate($form, &$form_state)
 	if ((isset($form_state['values']['email'])) && (!valid_email_address($form_state['values']['email']))) {
 		form_set_error('email', t('Please enter valid email address.'));
 	}
-	else
-	if (substr($form_state['values']['email'], 0, 1) == '_') {
+	else if (substr($form_state['values']['email'], 0, 1) == '_') {
 		form_set_error('email', t('Please enter valid email address.'));
-	}	
+		}	
 }
 
+// reseller form submit actions
 function reseller_form_submit($form, &$form_state)
 {
 	global $config;	
-	
-	
+
 	$data['Retailer_Name'] = trim($form_state['values']['retailer_name']);
 	$data['Retailer_Type'] = trim($form_state['values']['retailer_type']);
 	$data['Email'] =  trim($form_state['values']['email']);
@@ -272,10 +254,8 @@ function reseller_form_submit($form, &$form_state)
 	$data['Landline_No'] =  trim($form_state['values']['land-number']);
 	$data['RT_Brand_Type'] = trim($form_state['values']['resuller_type_list']);
 	$data['WR_University_Name'] = trim($form_state['values']['WR_University_Name']);
-	
-	
+		
 	$response = ApiPostNew(WP_MAINTAIN_WEBSITE_RETAILER, $data);
-	
 	//echo "<pre>".WP_MAINTAIN_WEBSITE_RETAILER; print_r($data); print_r($response); exit;	
 
 	if($response[0]['errcode']==0 && $response[0]['Retailer_ID']!=""){
@@ -290,6 +270,7 @@ function reseller_form_submit($form, &$form_state)
 
 }
 
+//reseller for status function call
 function reseller_status(){
 	global $base_url;
 	global $config;
@@ -320,172 +301,158 @@ function reseller_status(){
 		return $output;	
 }
 
+// student registration form
 function reseller_student_form($form, &$form_state){
 
 	global $base_url;
 	global $config;
 	
-		$response = apiPostVRP(RETAILER_TYPE);
-		
-		$resuller_type_options = array();
-		$resuller_type_ids = array();
+	$response = apiPostVRP(RETAILER_TYPE);
+	$resuller_type_options = array();
+	$resuller_type_ids = array();
 		foreach($response as $dn){
 			if($dn['errcode'] == -1){ continue; }
 			$resuller_type_options[$dn['RT_TypeId']] = $dn['RT_TypeName'];
-			
 		}	
 		
-		$form['form_title'] = array(
-			'#type' => 'item',
-			'#markup' => '<h1 class="text-center">'.t('Become a Student Ambassador').'</h1>',
-			'#prefix' => '<div class="pay-box"><div class="panel panel-default"><div class="panel-body">',
-			);
+	$form['form_title'] = array(
+		'#type' => 'item',
+		'#markup' => '<h1 class="text-center">'.t('Become a Student Ambassador').'</h1>',
+		'#prefix' => '<div class="pay-box"><div class="panel panel-default"><div class="panel-body">',
+	);
 
-
-		$form['retailer_name'] = array(
-	      '#type' => 'textfield',
-	      '#title' => t('Name'),
-		  '#maxlength' => 15,
-		  '#required' => TRUE,
-		  '#prefix' => '<div class="row"><div class="col-sm-6">',
-		  
-	    );
-		$form['email'] = array(
+	$form['retailer_name'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Name'),
+		'#maxlength' => 15,
+		'#required' => TRUE,
+		'#prefix' => '<div class="row"><div class="col-sm-6">',
+    );
+		
+	$form['email'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Email address'),
 		'#attributes' => array('id' => 'email', 'autocomplete' => 'off', 'placeholder' => t('Email Address')),
 		'#required' => TRUE,
-		);	
-		$form['delivery_address1'] = array(
-			'#title' => t('Postal Code'),
-			'#type' => 'item',
-			 '#maxlength' => 8,
-			'#required' => TRUE,
-			'#markup' => "<div  id='postcode_lookup'></div>",
-		);	
-		$form['pin_code'] = array(
-		  '#type' => 'hidden',
-		  '#maxlength' => 8,
-		  '#required' => TRUE,
-		  '#attributes' => array('id' => 'opc_input'),
+	);	
+	
+	$form['delivery_address1'] = array(
+		'#title' => t('Postal Code'),
+		'#type' => 'item',
+		'#maxlength' => 8,
+		'#required' => TRUE,
+		'#markup' => "<div  id='postcode_lookup'></div>",
+	);	
+	
+	$form['pin_code'] = array(
+		'#type' => 'hidden',
+		'#maxlength' => 8,
+		'#required' => TRUE,
+		'#attributes' => array('id' => 'opc_input'),
+	);		
 
-		);		
-		$form['address1'] = array(
-		  '#type' => 'textfield',
-		  '#title' => t('House Number'),
-		  //'#attributes' => array('readonly' => 'readonly'),
-		  '#maxlength' => 50,
-		 // '#description' => t('Address1'),
-		  '#required' => TRUE,
-		  '#attributes' => array('readonly' => 'readonly','placeholder' => t('House Number'),'id' => 'address1', 'autocomplete' => 'off'),
+	$form['address1'] = array(
+		'#type' => 'textfield',
+		'#title' => t('House Number'),
+		//'#attributes' => array('readonly' => 'readonly'),
+		'#maxlength' => 50,
+		// '#description' => t('Address1'),
+		'#required' => TRUE,
+		'#attributes' => array('readonly' => 'readonly','placeholder' => t('House Number'),'id' => 'address1', 'autocomplete' => 'off'),
+	);	
 		
-		);	
+	$form['address2'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Street Name'),
+		//'#attributes' => array('readonly' => 'readonly'),
+		'#maxlength' => 50,
+		//'#description' => t('Address2'),	
+		'#attributes' => array('placeholder' => t('Address2'),'id' => 'Street Name', 'autocomplete' => 'off'),
+		// '#required' => TRUE,
+		'#suffix' => '</div><div class="col-sm-6">'	 
+	);			
+	
+	$form['address3'] = array(
+	    '#type' => 'textfield',
+	    '#title' => t('Address Line3'),
+		//'#attributes' => array('readonly' => 'readonly'),
+		'#maxlength' => 50,
+		//'#description' => t('Please enter the address3'),
+		'#attributes' => array('placeholder' => t('Address Line3'),'id' => 'address3', 'autocomplete' => 'off'),
+		//'#required' => TRUE,		  
+	);
 		
+	$form['town'] = array(
+		'#type' => 'textfield',
+	    '#title' => t('Town'),
+		'#maxlength' => 50,
+		//'#attributes' => array('readonly' => 'readonly'),
+		'#required' => TRUE,
+		'#attributes' =>array('onblur' =>'townval(this,"town")','placeholder' => t('Town'), 'id' => 'town', 'autocomplete' => 'off'),		
+	);
 		
-		$form['address2'] = array(
-		  '#type' => 'textfield',
-		  '#title' => t('Street Name'),
-		  //'#attributes' => array('readonly' => 'readonly'),
-		  '#maxlength' => 50,
-		  //'#description' => t('Address2'),	
-		  '#attributes' => array('placeholder' => t('Address2'),'id' => 'Street Name', 'autocomplete' => 'off'),
-		 // '#required' => TRUE,
-		  '#suffix' => '</div><div class="col-sm-6">'	 
-		);			
-		$form['address3'] = array(
-	      '#type' => 'textfield',
-	      '#title' => t('Address Line3'),
-		  //'#attributes' => array('readonly' => 'readonly'),
-		  '#maxlength' => 50,
-		  //'#description' => t('Please enter the address3'),
-		  '#attributes' => array('placeholder' => t('Address Line3'),'id' => 'address3', 'autocomplete' => 'off'),
-		  //'#required' => TRUE,		  
-	    );
-		
-		$form['town'] = array(
-	      '#type' => 'textfield',
-	      '#title' => t('Town'),
-		  '#maxlength' => 50,
-		  //'#attributes' => array('readonly' => 'readonly'),
-		  '#required' => TRUE,
-		  '#attributes' =>array('onblur' =>'townval(this,"town")','placeholder' => t('Town'), 'id' => 'town', 'autocomplete' => 'off'),		
-		    
-	    );
-					
-		
-		/*$form['pin_code'] = array(
-			'#title' => t('Postal Code') ,
-			'#type' => 'textfield',
-			'#maxlength' => 8,
-			'#required' => TRUE,
-			'#default_value' => $_SESSION['postcode'],
-			'#attributes' => array(
-				//'onblur' => 'postcodeval(this,"code")',
-				'placeholder' => t('Postal Code') ,
-				'autocomplete' => 'off',
-				'id' => 'varchar_postcode'
-			) ,
-		);	*/
-		$form['prefered_lang'] = array(
-			'#type' => 'select',
-			'#title' => t('Prefered Language'),
-			'#options' => $config['languages'],
-			'#required' => TRUE,
+	$form['prefered_lang'] = array(
+		'#type' => 'select',
+		'#title' => t('Prefered Language'),
+		'#options' => $config['languages'],
+		'#required' => TRUE,
+	);						
 
-		);						
-		$form['retailer_type'] = array(
-	      '#type' => 'hidden',
-		  '#default_value' => $config['reseller'],
-	    );	
-		$form['country'] = array(
+	$form['retailer_type'] = array(
+		'#type' => 'hidden',
+		'#default_value' => $config['reseller'],
+	);
+		
+	$form['country'] = array(
 	      '#type' => 'hidden',
 		  '#default_value' => $config['country_code'],
-	    );
+	);
 		
-		$form['WR_University_Name'] = array(
-	      '#type' => 'hidden',
-		  '#default_value' => 'UK University Of India',
-	    );	
+	$form['WR_University_Name'] = array(
+		'#type' => 'hidden',
+		'#default_value' => 'UK University Of India',
+	);	
 		
-		$form['mobile-number'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Mobile number'),
-			'#required' => TRUE,
-			'#maxlength' => 15,
-			'#default_value' => $ses_mob_number,
-			'#attributes' => array( 'id' => 'mobile-number', 'autocomplete' => 'off', 'placeholder' => t('Mobile Number')),
-		);	
-		$form['land-number'] = array(
-			'#type' => 'textfield',
-			'#title' => t('Land Line'),
-			'#maxlength' => 15,
-			'#attributes' => array( 'id' => 'land-number', 'autocomplete' => 'off', 'placeholder' => t('Land Line')),	
-		);	
+	$form['mobile-number'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Mobile Number'),
+		'#required' => TRUE,
+		'#maxlength' => 15,
+		'#default_value' => $ses_mob_number,
+		'#attributes' => array('id'=>'mobile-number', 'autocomplete'=>'off', 'placeholder'=>t('Mobile Number')),
+	);
+		
+	$form['land-number'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Land Line'),
+		'#maxlength' => 15,
+		'#attributes' => array('id' =>'land-number', 'autocomplete'=>'off', 'placeholder'=> t('Land Line')),	
+	);	
 	
-		$form['resuller_type_list'] = array(
-			'#type' => 'select',
-			'#title' => t('Type'),
-			'#options' => $resuller_type_options,
-			'#required' => TRUE,			
-		);								
+	$form['resuller_type_list'] = array(
+		'#type' => 'select',
+		'#title' => t('Type'),
+		'#options' => $resuller_type_options,
+		'#required' => TRUE,			
+	);								
 		
-		$form['reseller_btn_submit'] = array(
+	$form['reseller_btn_submit'] = array(
 		'#type' => 'submit',
 		'#value' => t('Proceed'),
 		'#prefix' => '</div><div class="col-xs-12 text-center pull-left">',
 		'#suffix'=> '</div></div></div></div></div>',
 		'#attributes' => array('class' => array('btn-voilet')),
-		
-		);						
-		
+	);						
 		
 	return $form;	
 
 }
+
+// student form validation
 function reseller_student_form_validate($form, &$form_state)
 {
 	if ( isset($form_state['values']['resuller_type_list']) && trim($form_state['values']['resuller_type_list']) == '0'){
-		form_set_error('resuller_type_list', t('Please Select Resuller Brand Type.'));
+		form_set_error('resuller_type_list', t('Please Select Reseller Brand Type.'));
 	}
 	if ( isset($form_state['values']['pin_code']) && trim($form_state['values']['pin_code']) == '0'){
 		form_set_error('pin_code', t('Please Entry Postal Code.'));
@@ -501,11 +468,12 @@ function reseller_student_form_validate($form, &$form_state)
 		form_set_error('email', t('Please enter valid email address.'));
 	}	
 }
+
+// student form submit
 function reseller_student_form_submit($form, &$form_state)
 {
 	global $config;	
-	
-	
+		
 	$data['Retailer_Name'] = trim($form_state['values']['retailer_name']);
 	$data['Retailer_Type'] = trim($form_state['values']['retailer_type']);
 	$data['Email'] =  trim($form_state['values']['email']);
@@ -519,9 +487,7 @@ function reseller_student_form_submit($form, &$form_state)
 	$data['RT_Brand_Type'] = trim($form_state['values']['resuller_type_list']);
 	$data['WR_University_Name'] = trim($form_state['values']['WR_University_Name']);
 	
-	
 	$response = ApiPostNew(WP_MAINTAIN_WEBSITE_RETAILER, $data);
-	
 	//echo "<pre>".WP_MAINTAIN_WEBSITE_RETAILER; print_r($data); print_r($response); exit;	
 
 	if($response[0]['errcode']==0 && $response[0]['Retailer_ID']!=""){
@@ -533,8 +499,9 @@ function reseller_student_form_submit($form, &$form_state)
 	}
 	header("Location:" . get_url_with_language("reseller/student/registration/status") );
 	exit;	
-
 }
+
+// student form registration status
 function reseller_student_status(){
 	global $base_url;
 	global $config;
@@ -543,24 +510,25 @@ function reseller_student_status(){
 		header("Location:" . get_url_with_language("reseller/student/registration") );	
 		exit;
 	}
-		if($_SESSION['reseller_student_status'] == 'success'){
-			$output = "<div class='panel panel-default text-center'>
-			<div class='panel-heading bg-grey-dark'>".t('Thank you for your order!')."</div><div class='panel-body'>";
-			$output.="<div class='status-help' class='success-msg'><h1>".t('Confirmation')."</h1><h4>".t('Your order has been processed successfully')."</h4>";
-			$output.="<ul class='list-inline'>
-			<p>".t('Your order reference number is')." ".$_SESSION['retailer_id']."</p></li></ul>";
-			$output.="<span>".t('If you have any further questions about your order, please contact')." <a target='_blank' href='".$config['contact_url']."' >".t('Support')."</a>.</span></div></div>";
-		}else{
-			$output = "<div class='panel panel-default text-center'>
-			<div class='panel-heading bg-grey-dark'>".t('Your order has been failed!')."</div><div class='panel-body'>";
-			$output.="<div class='status-help' class='success-msg'><h1>".t('Order Status')."</h1><h4>".t('Your order has been failed.')."</h4>";
-			$output.="<span>".t('If you have any further questions about your order, please contact')." <a target='_blank' href='".$config['contact_url']."' >".t('Support')."</a>.</span></div></div>";
+	
+	if($_SESSION['reseller_student_status'] == 'success'){
+		$output = "<div class='panel panel-default text-center'>
+		<div class='panel-heading bg-grey-dark'>".t('Thank you for your order!')."</div><div class='panel-body'>";
+		$output.="<div class='status-help' class='success-msg'><h1>".t('Confirmation')."</h1><h4>".t('Your order has been processed successfully')."</h4>";
+		$output.="<ul class='list-inline'>
+		<p>".t('Your order reference number is')." ".$_SESSION['retailer_id']."</p></li></ul>";
+		$output.="<span>".t('If you have any further questions about your order, please contact')." <a target='_blank' href='".$config['contact_url']."' >".t('Support')."</a>.</span></div></div>";
+	}else{
+		$output = "<div class='panel panel-default text-center'>
+		<div class='panel-heading bg-grey-dark'>".t('Your order has been failed!')."</div><div class='panel-body'>";
+		$output.="<div class='status-help' class='success-msg'><h1>".t('Order Status')."</h1><h4>".t('Your order has been failed.')."</h4>";
+		$output.="<span>".t('If you have any further questions about your order, please contact')." <a target='_blank' href='".$config['contact_url']."' >".t('Support')."</a>.</span></div></div>";
 			
-		}
-		unset($_SESSION['ref_url']);
-		unset($_SESSION['reseller_student_status']);
-		unset($_SESSION['retailer_id']);
-		unset($_SESSION['retailer_name']);
+	}
+	unset($_SESSION['ref_url']);
+	unset($_SESSION['reseller_student_status']);
+	unset($_SESSION['retailer_id']);
+	unset($_SESSION['retailer_name']);
 		
 		return $output;	
 }
